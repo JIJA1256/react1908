@@ -1,63 +1,132 @@
 import React, { useState } from 'react';
 
 const Item = () => {
-    const [answers, setAnswers] = useState([]);
+  const [riddles, setRiddles] = useState([
+    {
+      id: 1,
+      description: 'Самая маленькая старна в мире?',
+      option1: 'Люксембург',
+      option2: 'Монако',
+      option3: 'Ватикан',
+      option4: 'Россия',
+      correct: 3
+    },
+    {
+      id: 2,
+      description: 'Самая длинная река в мире?',
+      option1: 'Нил',
+      option2: 'Амазонка',
+      option3: 'Волга',
+      option4: 'Янцзы',
+      correct: 2
+    },
+    {
+      id: 3,
+      description: 'Сколько субьектов в РФ?',
+      option1: '89',
+      option2: '83',
+      option3: '85',
+      option4: '90',
+      correct: 3
+    },
+    
+  ]);
+  const [userAnswers, setUserAnswers] = useState({});
+  const [newRiddleData, setNewRiddleData] = useState({
+    description: '',
+    option1: '',
+    option2: '',
+    option3: '',
+    option4: '',
+    correct: 1
+  });
 
-    const content = [
-        {
-            'id': 1,
-            'description': "Самая маленькая страна в мире?",
-			'option1': "Люксембург",
-			'option2': "Россия",
-			'option3': "Ватикан",
-			'option4': "Монако",
-			'correct': "3"
-        },
-        {
-            'id': 2,
-            'description': "Самая длинная река в мире?",
-			'option1': "Ро",
-			'option2': "Нил",
-			'option3': "Амазонка",
-			'option4': "волга",
-			'correct': "3"
-        },
-        {
-            'id': 3,
-            'description': "Сколько субьектов в РФ?",
-			'option1': "89",
-			'option2': "83",
-			'option3': "88",
-			'option4': "90",
-			'correct': '3'
-        }
-    ];
+  const handleAnswerSelection = (riddleId, answer) => {
+    setUserAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [riddleId]: answer,
+    }));
+  };
 
-    const handleAnswer = (questionId, selectedOption) => {
-        const correctAnswer = content.find(item => item.id === questionId).correct;
-        const isCorrect = selectedOption === correctAnswer;
-        setAnswers([...answers, { questionId, isCorrect }]);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewRiddleData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const addRiddle = () => {
+    const newRiddle = {
+      id: riddles.length + 1,
+      description: newRiddleData.description,
+      option1: newRiddleData.option1,
+      option2: newRiddleData.option2,
+      option3: newRiddleData.option3,
+      option4: newRiddleData.option4,
+      correct: parseInt(newRiddleData.correct)
     };
+    setRiddles((prevRiddles) => [...prevRiddles, newRiddle]);
+    // Очищаем данные формы после добавления новой загадки
+    setNewRiddleData({
+      description: '',
+      option1: '',
+      option2: '',
+      option3: '',
+      option4: '',
+      correct: ''
+    });
+  };
 
-    return (
-        <div>
-            {content.map((question) => (
-                <div key={question.id}>
-                    <h1>Вопрос №{question.id}</h1>
-                    <p>{question.description}</p>
-                    <button onClick={() => handleAnswer(question.id, '1')}>{question.option1}</button>
-                    <button onClick={() => handleAnswer(question.id, '2')}>{question.option2}</button>
-                    <button onClick={() => handleAnswer(question.id, '3')}>{question.option3}</button>
-                    <button onClick={() => handleAnswer(question.id, '4')}>{question.option4}</button>
-                </div>
-            ))}
-            <div>
-                {answers.map((answer, index) => (
-                    <p key={index}>{`Вопрос ${answer.questionId}: ${answer.isCorrect ? 'Правильно' : 'Неправильно'}`}</p>
-                ))}
-            </div>
-        </div>
-    );
+  return (
+    <div>
+      {/* Форма для ввода новой загадки */}
+      <input type="text" name="description" value={newRiddleData.description} onChange={handleInputChange} placeholder="Описание загадки" />
+      <input type="text" name="option1" value={newRiddleData.option1} onChange={handleInputChange} placeholder="Вариант ответа 1" />
+      <input type="text" name="option2" value={newRiddleData.option2} onChange={handleInputChange} placeholder="Вариант ответа 2" />
+      <input type="text" name="option3" value={newRiddleData.option3} onChange={handleInputChange} placeholder="Вариант ответа 3" />
+      <input type="text" name="option4" value={newRiddleData.option4} onChange={handleInputChange} placeholder="Вариант ответа 4" />
+      <input type="number" name="correct" min="1" max="4" value={newRiddleData.correct} onChange={handleInputChange} placeholder="Номер правильного ответа" />
+      <button onClick={addRiddle}>Добавить новую загадку</button>
+
+      {/* Отображение загадок */}
+      {riddles.map((riddle) => {
+        const userAnswer = userAnswers[riddle.id];
+        const isCorrect = userAnswer === riddle.correct;
+        const feedback = isCorrect ? 'Правильный ответ!' : 'Вы ответили неправильно';
+
+        return (
+          <div key={riddle.id} className="riddle-container">
+            <h3 className="riddle-description">{riddle.description} </h3>
+            <ol className="answer-options">
+              <li>
+                <button className="answer-button" onClick={() => handleAnswerSelection(riddle.id, 1)}>
+                  {riddle.option1}
+                </button>
+              </li>
+              <li>
+                <button className="answer-button" onClick={() => handleAnswerSelection(riddle.id, 2)}>
+                  {riddle.option2}
+                </button>
+              </li>
+              <li>
+                <button className="answer-button" onClick={() => handleAnswerSelection(riddle.id, 3)}>
+                  {riddle.option3}
+                </button>
+              </li>
+              <li>
+                <button className="answer-button" onClick={() => handleAnswerSelection(riddle.id, 4)}>
+                  {riddle.option4}
+                </button>
+              </li>
+              {/* Остальные варианты ответов... */}
+            </ol>
+            {userAnswer && <p className="feedback">{feedback}</p>}
+          </div>
+        );
+      })}
+    </div>
+  );
 };
 
 export default Item;
